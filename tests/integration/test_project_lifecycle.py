@@ -88,6 +88,7 @@ def test_project_creation_flow(browser_context, api_client, env_config):
         f"but not visible in UI"
     )
 
+    projects_page.open_project(project_data["name"])
     details = projects_page.get_project_details()
     assert details["name"] == project_data["name"]
     assert details["status"] == "active"

@@ -57,30 +57,24 @@ playwright install chromium
 
 ### Environment Variables
 
-Copy `.env.example` and configure:
+Set these in your shell or in a `.env` file (not committed):
 
-```bash
-# Required
-TEST_ENV=staging
-BASE_URL=https://company1.staging.workflowpro.com
-API_BASE_URL=https://api.staging.workflowpro.com
-TENANT_ID=company1
-TEST_EMAIL=admin@company1.com
-TEST_PASSWORD=<password>
-API_AUTH_TOKEN=<token>
-
-# Tenant-specific (for isolation tests)
-COMPANY1_TOKEN=<token>
-COMPANY2_TOKEN=<token>
-
-# Optional: 2FA testing
-TEST_2FA_CODE=123456
-
-# Optional: BrowserStack
-BROWSERSTACK_USERNAME=<username>
-BROWSERSTACK_ACCESS_KEY=<key>
-BROWSERSTACK=true
-```
+| Variable | Required | Description |
+|---|---|---|
+| `TEST_ENV` | Yes | Environment name: `local`, `ci`, or `staging` |
+| `BASE_URL` | Yes | Web app URL (e.g. `https://company1.staging.workflowpro.com`) |
+| `API_BASE_URL` | Yes | API base URL (e.g. `https://api.staging.workflowpro.com`) |
+| `TENANT_ID` | Yes | Default tenant under test (e.g. `company1`) |
+| `TEST_EMAIL` | Yes | Login email for test user |
+| `TEST_PASSWORD` | Yes | Login password |
+| `API_AUTH_TOKEN` | Yes | Bearer token for API client |
+| `COMPANY1_TOKEN` | For isolation tests | Auth token for company1 |
+| `COMPANY2_TOKEN` | For isolation tests | Auth token for company2 |
+| `TEST_2FA_CODE` | For 2FA tests | TOTP code (if 2FA enabled for test user) |
+| `BROWSERSTACK_USERNAME` | For BrowserStack | BrowserStack account username |
+| `BROWSERSTACK_ACCESS_KEY` | For BrowserStack | BrowserStack account access key |
+| `HEADLESS` | No | Run headless (`true`/`false`, default `true`) |
+| `DEFAULT_TIMEOUT` | No | Playwright timeout in ms (default `15000`) |
 
 ## Running Tests
 

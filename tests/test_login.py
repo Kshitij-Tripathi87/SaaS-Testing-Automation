@@ -36,7 +36,10 @@ def test_login_form_validation(browser_context, env_config):
 def test_login_invalid_credentials(browser_context, env_config):
     page = browser_context
     login_page = LoginPage(page)
-    login_page.login_as(env_config.base_url, "invalid@test.com", "wrongpass")
+    login_page.navigate_to(env_config.base_url)
+    login_page.fill_email("invalid@test.com")
+    login_page.fill_password("wrongpass")
+    login_page.click_login()
 
     error = page.locator("[data-testid='login-error']")
     expect(error).to_be_visible(timeout=10000)

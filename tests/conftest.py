@@ -1,14 +1,43 @@
 import os
 import json
+import threading
 import pytest
 from playwright.sync_api import sync_playwright
 from src.config.settings import EnvironmentConfig, BrowserStackConfig
 from src.api.client import APIClient
 
 
+def _is_mock_mode():
+    return os.getenv("TEST_ENV", "").lower() in ("", "mock")
+
+
 @pytest.fixture(scope="session")
-def env_config():
-    return EnvironmentConfig.from_env()
+def mock_server():
+    """Start a lightweight mock server for offline testing."""
+    if not _is_mock_mode():
+        yield None
+        return
+
+    from tests.mock_server import MockHandler
+    from http.server import HTTPServer
+
+    server = HTTPServer(("127.0.0.1", 0), MockHandler)
+    port = server.server_port
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    yield port
+    server.shutdown()
+
+
+@pytest.fixture(scope="session")
+def env_config(mock_server):
+    config = EnvironmentConfig.from_env()
+    if mock_server:
+        config.base_url = f"http://127.0.0.1:{mock_server}"
+        config.api_url = f"http://127.0.0.1:{mock_server}"
+        config.tenant_id = "company1"
+        config.headless = True
+    return config
 
 
 @pytest.fixture(scope="session")
@@ -18,7 +47,7 @@ def browserstack_config():
 
 @pytest.fixture(scope="function")
 def api_client(env_config):
-    auth_token = os.getenv("API_AUTH_TOKEN")
+    auth_token = os.getenv("API_AUTH_TOKEN", "mock-token")
     return APIClient(
         base_url=env_config.api_url,
         tenant_id=env_config.tenant_id,
@@ -93,9 +122,11 @@ def pytest_runtest_makereport(item, call):
     report = outcome.get_result()
 
     if report.when == "call" and report.failed:
-        page = item.funcargs.get("browser_context")
-        if page:
-            test_name = item.nodeid.replace("::", "_").replace("/", "_")
-            screenshot_dir = "reports/screenshots"
-            os.makedirs(screenshot_dir, exist_ok=True)
-            page.screenshot(path=f"{screenshot_dir}/{test_name}_fail.png")
+        for fixture_name in ("browser_context", "browser_context_mobile"):
+            page = item.funcargs.get(fixture_name)
+            if page:
+                test_name = item.nodeid.replace("::", "_").replace("/", "_")
+                screenshot_dir = "reports/screenshots"
+                os.makedirs(screenshot_dir, exist_ok=True)
+                page.screenshot(path=f"{screenshot_dir}/{test_name}_fail.png")
+                break

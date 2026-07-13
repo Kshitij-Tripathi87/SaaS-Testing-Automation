@@ -22,8 +22,12 @@ reports/
 
 # Environment files
 .env
-.env.local
+.env.*
 *.yaml.local
+
+# Node (in case of any JS tooling)
+node_modules/
+package-lock.json
 
 # OS
 .DS_Store

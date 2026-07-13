@@ -13,20 +13,20 @@ from data.factories.project_factory import ProjectFactory
 
 
 @pytest.fixture(scope="function")
-def company1_client():
+def company1_client(env_config):
     return APIClient(
-        base_url=os.getenv("API_BASE_URL", "https://api.workflowpro.com"),
+        base_url=env_config.api_url,
         tenant_id="company1",
-        auth_token=os.getenv("COMPANY1_TOKEN"),
+        auth_token=os.getenv("COMPANY1_TOKEN", "mock-token"),
     )
 
 
 @pytest.fixture(scope="function")
-def company2_client():
+def company2_client(env_config):
     return APIClient(
-        base_url=os.getenv("API_BASE_URL", "https://api.workflowpro.com"),
+        base_url=env_config.api_url,
         tenant_id="company2",
-        auth_token=os.getenv("COMPANY2_TOKEN"),
+        auth_token=os.getenv("COMPANY2_TOKEN", "mock-token"),
     )
 
 
