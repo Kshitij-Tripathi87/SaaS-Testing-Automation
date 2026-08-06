@@ -22,11 +22,12 @@ Edge Cases:
 import os
 import pytest
 from playwright.sync_api import expect
-from src.api.client import APIClient
-from src.ui.pages.login_page import LoginPage
-from src.ui.pages.projects_page import ProjectsPage
-from src.mobile.pages.mobile_projects_page import MobileProjectsPage
+from tenant_shield.api.client import APIClient
+from tenant_shield.ui.pages.login_page import LoginPage
+from tenant_shield.ui.pages.projects_page import ProjectsPage
+from tenant_shield.mobile.pages.mobile_projects_page import MobileProjectsPage
 from data.factories.project_factory import ProjectFactory
+from tenant_shield.isolation import assert_summary, verify_cross_tenant_access
 
 
 def create_project_via_api(api_client, project_data):
@@ -43,18 +44,18 @@ def delete_project_via_api(api_client, project_id):
 
 
 def verify_tenant_isolation(api_client, target_tenant_id, project_id):
-    client = APIClient(
+    """Cross-tenant read must be denied (403/404)."""
+    intruder_client = APIClient(
         base_url=api_client.base_url,
         tenant_id=target_tenant_id,
         auth_token=api_client.session.headers.get("Authorization", "").replace(
             "Bearer ", ""
         ),
     )
-    response = client.get(f"/api/v1/projects/{project_id}")
-    assert response.status_code in (403, 404), (
-        f"Tenant isolation breach! Tenant {target_tenant_id} "
-        f"could access project {project_id}. Status: {response.status_code}"
+    summary = verify_cross_tenant_access(
+        api_client, intruder_client, project_id, include=["read"]
     )
+    assert_summary(summary)
 
 
 @pytest.mark.integration

@@ -36,3 +36,19 @@ Thumbs.db
 # Test artifacts
 test-results/
 playwright-report/
+
+# Platform — Next.js / Dashboard
+.next/
+out/
+.vercel/
+
+# Platform — Terraform
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
+
+# Platform — test databases
+test_tenant_shield.db
+test_*.db
+.cache/
