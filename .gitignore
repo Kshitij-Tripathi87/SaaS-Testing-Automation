@@ -4,6 +4,7 @@ __pycache__/
 *.egg-info/
 dist/
 build/
+.pytest_cache/
 
 # Virtual environment
 venv/
@@ -20,10 +21,14 @@ reports/
 *.swp
 *.swo
 
-# Environment files
+# Environment files / secrets
 .env
 .env.*
+.env.local
 *.yaml.local
+*.pem
+*.key
+credentials.json
 
 # Node (in case of any JS tooling)
 node_modules/
@@ -36,6 +41,7 @@ Thumbs.db
 # Test artifacts
 test-results/
 playwright-report/
+allure-results/
 
 # Platform — Next.js / Dashboard
 .next/
