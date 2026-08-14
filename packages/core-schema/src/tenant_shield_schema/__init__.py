@@ -16,6 +16,14 @@ from tenant_shield_schema.run_spec import (
 )
 from tenant_shield_schema.results import TestResult, RunSummary
 from tenant_shield_schema.auth import Organization, Project, ApiKey
+from tenant_shield_schema.sandbox import (
+    SandboxSpec,
+    SandboxLifecycleEvent,
+    TeardownProof,
+    CanaryCheckResult,
+    RunReport,
+    SignedReceipt,
+)
 
 __all__ = [
     "Goal",
@@ -33,6 +41,12 @@ __all__ = [
     "Organization",
     "Project",
     "ApiKey",
+    "SandboxSpec",
+    "SandboxLifecycleEvent",
+    "TeardownProof",
+    "CanaryCheckResult",
+    "RunReport",
+    "SignedReceipt",
 ]
 
 __version__ = "0.1.0"

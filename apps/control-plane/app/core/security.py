@@ -1,7 +1,14 @@
 """API Key authentication dependency for the Control Plane.
 
-Extracts X-TenantShield-Key header, validates against DB, and attaches
-the ApiKey record and its Project to the request state.
+Extracts the API key from the request headers, validates against DB, and
+attaches the ApiKey record and its Project to the request state.
+
+Header reconciliation (Phase 3 Track B):
+  - `X-API-Key` is the FROZEN contract header (docs/api_contract.md v1).
+  - `X-TenantShield-Key` is the legacy header from the Phase 1 control
+    plane. It's accepted for backwards compatibility and will be dropped
+    in v2. The contract header is checked first; when both are present,
+    `X-API-Key` wins.
 """
 
 import hashlib
@@ -13,14 +20,23 @@ from app.services.api_key_service import ApiKeyService
 from app.db.models import ApiKey
 
 
-async def require_api_key(request: Request, db: AsyncSession = Depends(get_db)) -> ApiKey:
-    """FastAPI dependency: extract and validate the X-TenantShield-Key header."""
+def _extract_api_key(request: Request) -> str:
+    """Pull the API key from the contract header, then the legacy one."""
+    raw_key = request.headers.get("X-API-Key")
+    if raw_key:
+        return raw_key
     raw_key = request.headers.get("X-TenantShield-Key")
-    if not raw_key:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Missing X-TenantShield-Key header",
-        )
+    if raw_key:
+        return raw_key
+    raise HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Missing X-API-Key header",
+    )
+
+
+async def require_api_key(request: Request, db: AsyncSession = Depends(get_db)) -> ApiKey:
+    """FastAPI dependency: extract and validate the API key header."""
+    raw_key = _extract_api_key(request)
     service = ApiKeyService(db)
     record = await service.validate_key(raw_key)
     if not record:

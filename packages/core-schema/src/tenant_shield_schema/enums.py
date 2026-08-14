@@ -10,6 +10,7 @@ class Goal(str, Enum):
     MOBILE = "mobile"
     REGRESSION = "regression"
     CUSTOM = "custom"
+    FUNCTIONAL = "functional"
 
 
 class RunStatus(str, Enum):

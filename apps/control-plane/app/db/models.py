@@ -40,6 +40,7 @@ class Project(Base):
 
     org: Mapped["Organization"] = relationship(back_populates="projects")
     api_keys: Mapped[list["ApiKey"]] = relationship(back_populates="project", cascade="all, delete-orphan")
+    devices: Mapped[list["Device"]] = relationship(back_populates="project", cascade="all, delete-orphan")
     runs: Mapped[list["TestRun"]] = relationship(back_populates="project", cascade="all, delete-orphan")
 
 
@@ -56,6 +57,27 @@ class ApiKey(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=_now)
 
     project: Mapped["Project"] = relationship(back_populates="api_keys")
+
+
+class Device(Base):
+    """A registered device (e.g. a CI runner / developer machine) that runs
+    sandboxed test runs on behalf of a project.
+
+    The demo-token flow (POST /v1/auth/demo-token) registers a device
+    bound to the demo project. Real OAuth device flows are on the
+    roadmap; this model is the frozen skeleton the future flow fills in.
+    """
+
+    __tablename__ = "devices"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_uuid)
+    project_id: Mapped[str] = mapped_column(ForeignKey("projects.id", ondelete="CASCADE"))
+    name: Mapped[str] = mapped_column(String(255), default="")
+    token_hash: Mapped[str] = mapped_column(String(255), nullable=False, unique=True)
+    last_seen_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=_now)
+
+    project: Mapped["Project"] = relationship(back_populates="devices")
 
 
 class TestRun(Base):

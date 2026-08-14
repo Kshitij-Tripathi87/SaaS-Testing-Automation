@@ -14,8 +14,13 @@ class RunService:
     def __init__(self, db: AsyncSession):
         self.db = db
 
-    async def create_run(self, project_id: str, spec: dict) -> TestRun:
-        """Create a new test run and enqueue it."""
+    async def create_run(self, project_id: str, spec: dict, enqueue: bool = True) -> TestRun:
+        """Create a new test run and (legacy path) enqueue it.
+
+        The frozen-contract path (POST /v1/runs) executes the run in-process
+        in a background task, so it passes enqueue=False. The legacy queue
+        path (worker engine polling) is kept for backwards compatibility.
+        """
         record = TestRun(
             project_id=project_id,
             goal=spec.get("goal", "smoke"),
@@ -26,9 +31,10 @@ class RunService:
         await self.db.commit()
         await self.db.refresh(record)
 
-        # Enqueue with run_id injected
-        spec["run_id"] = record.id
-        await run_queue.enqueue(spec)
+        if enqueue:
+            # Enqueue with run_id injected
+            spec["run_id"] = record.id
+            await run_queue.enqueue(spec)
 
         return record
 

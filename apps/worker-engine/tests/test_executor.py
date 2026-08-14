@@ -107,9 +107,18 @@ def test_execute_run_minimal_spec_success():
     assert streamer.log.call_count >= 1
 
 
-def test_execute_run_markers_passed_as_m_argument():
-    """Markers from the spec are passed as a `-m marker` argument to subprocess.run."""
-    spec_dict = {"goal": "smoke", "markers": ["security", "regression"]}
+def test_execute_run_markers_not_passed_to_pytest():
+    """Markers from the spec are NOT passed to pytest via -m.
+
+    The spec's markers are workflo's internal probe-group labels
+    (e.g. ["surface"], ["deep", "security"]), NOT pytest markers.
+    Passing them as pytest's -m would deselect every test that doesn't
+    have an explicit @pytest.mark.surface decorator — which is every
+    test in a typical repo. The worker engine treats markers as
+    probe-group identification only; pytest runs the repo's whole suite
+    unfiltered for surface tests.
+    """
+    spec_dict = {"goal": "security", "markers": ["security", "regression"]}
     summary_data = {
         "summary": {"total": 0, "passed": 0, "failed": 0, "skipped": 0, "deselected": 0},
         "duration": 0.0,
@@ -140,15 +149,24 @@ def test_execute_run_markers_passed_as_m_argument():
     ):
         execute_run(spec_dict, streamer)
 
-    # The `-m` argument should be present with the joined markers
-    assert "-m" in captured_cmd
-    marker_index = captured_cmd.index("-m")
-    # The value right after `-m` should be the joined markers
-    assert captured_cmd[marker_index + 1] == "security regression"
+    # The pytest marker flag `-m` should NOT be present (markers are
+    # workflo's internal labels, not pytest markers).
+    # But python's `-m pytest` flag WILL be present.
+    # We need to distinguish: pytest's -m is followed by a marker expression,
+    # python's -m is followed by "pytest".
+    pytest_m_flags = [i for i, v in enumerate(captured_cmd) if v == "-m"]
+    pytest_marker_flags = [
+        i for i in pytest_m_flags
+        if i + 1 < len(captured_cmd) and captured_cmd[i + 1] != "pytest"
+    ]
+    assert pytest_marker_flags == [], (
+        f"pytest's -m marker flag should not be present; "
+        f"got marker flags at indices {pytest_marker_flags} in {captured_cmd}"
+    )
 
 
-def test_execute_run_no_markers_omits_m_argument():
-    """When no markers are present, the `-m` argument should be omitted."""
+def test_execute_run_no_pytest_m_argument():
+    """When no markers are present, pytest's -m is omitted (python's -m pytest remains)."""
     spec_dict = {"goal": "smoke", "markers": []}
     summary_data = {
         "summary": {"total": 0, "passed": 0, "failed": 0, "skipped": 0, "deselected": 0},
@@ -180,7 +198,13 @@ def test_execute_run_no_markers_omits_m_argument():
     ):
         execute_run(spec_dict, streamer)
 
-    assert "-m" not in captured_cmd
+    # pytest's -m should not be present; python's -m pytest will be
+    pytest_m_flags = [i for i, v in enumerate(captured_cmd) if v == "-m"]
+    pytest_marker_flags = [
+        i for i in pytest_m_flags
+        if i + 1 < len(captured_cmd) and captured_cmd[i + 1] != "pytest"
+    ]
+    assert pytest_marker_flags == []
 
 
 def test_execute_run_includes_targets_in_cmd():

@@ -54,8 +54,12 @@ def test_run_with_key_has_scope(client):
     raw_key = create.json()["raw_key"]
     headers = {"X-TenantShield-Key": raw_key}
 
-    resp = client.post("/v1/runs", json={"goal": "smoke"}, headers=headers)
-    assert resp.status_code == 202
+    resp = client.post(
+        "/v1/runs",
+        json={"repo_url": "https://github.com/example/repo.git", "probe_groups": ["test"]},
+        headers=headers,
+    )
+    assert resp.status_code == 200
 
 
 def test_key_hash_is_secure(client):

@@ -58,3 +58,12 @@ out/
 test_tenant_shield.db
 test_*.db
 .cache/
+
+# Runtime SQLite database (contains hashed API keys — never commit)
+*.db
+*.sqlite
+*.sqlite3
+
+# Local smoke-test receipts (generated during verification)
+receipt-*.json
+verify-test-receipt*.json

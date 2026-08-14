@@ -28,6 +28,8 @@ class RunSummary(BaseModel):
     deselected: int = 0
     positive_controls_passed: int = 0
     duration_seconds: float = 0.0
+    soc2_controls: list[str] = Field(default_factory=list)
+    findings: list[dict] = Field(default_factory=list)
 
     @property
     def pass_rate_pct(self) -> float:

@@ -7,6 +7,7 @@ from app.api.v1.health import router as health_router
 from app.api.v1.runs import router as runs_router
 from app.api.v1.keys import router as keys_router
 from app.api.v1.artifacts import router as artifacts_router
+from app.api.v1.auth import router as auth_router
 from app.db.database import init_db
 from app.db.queue import run_queue
 from app.core.config import settings
@@ -33,6 +34,7 @@ def create_app() -> FastAPI:
     app.include_router(runs_router, prefix="/v1", tags=["runs"])
     app.include_router(keys_router, prefix="/v1", tags=["keys"])
     app.include_router(artifacts_router, prefix="/v1", tags=["artifacts"])
+    app.include_router(auth_router, prefix="/v1", tags=["auth"])
 
     @app.get("/")
     async def root():

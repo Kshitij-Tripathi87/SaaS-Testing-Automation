@@ -20,6 +20,7 @@ dependencies = [
     "python-multipart>=0.0.6",
     "tenant-shield-schema",
     "tenant-shield-utils",
+    "quarantyne-executor",
 ]
 
 [project.optional-dependencies]
