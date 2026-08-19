@@ -115,52 +115,6 @@ pytest apps/agent-cli/tests -v            # 34 tests — CLI agent
 pytest apps/worker-engine/tests -v       # 33 tests — worker engine
 ```
 
-## DataHub Integration
-
-The `packages/datahub-client/` package is the bridge to DataHub:
-
-| Module | Purpose |
-|---|---|
-| `client.py` | Connects via GraphQL (default) or the MCP Server (optional) |
-| `inspector.py` | Reads schemas + lineage, computes integrity scores |
-| `generator.py` | Generates pytest modules from DataHub metadata |
-| `writeback.py` | Writes test outcomes back to DataHub as assertions + incidents |
-
-## API Endpoints (Control Plane)
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET`  | `/v1/health` | Health check |
-| `POST` | `/v1/runs` | Submit a test run (requires `X-TenantShield-Key`) |
-| `GET`  | `/v1/runs/{id}` | Get run status + summary + logs |
-| `POST` | `/v1/runs/{id}/logs` | Worker streams logs |
-| `POST` | `/v1/runs/{id}/complete` | Worker signals completion |
-| `POST` | `/v1/keys` | Create an API key (returns raw key once) |
-| `GET`  | `/v1/keys` | List API keys |
-| `DELETE` | `/v1/keys/{id}` | Revoke an API key |
-| `GET`  | `/v1/runs/{id}/results` | Detailed test list |
-| `GET`  | `/v1/runs/{id}/artifacts` | List artifacts |
-| `GET`  | `/v1/runs/{id}/report` | SOC 2 report link |
-
-## Environment Variables
-
-| Variable | Required | Description |
-|---|---|---|
-| `TEST_ENV` | Yes | Environment name: `local`, `ci`, or `staging` |
-| `BASE_URL` | Yes | Web app URL |
-| `API_BASE_URL` | Yes | API base URL |
-| `TENANT_ID` | Yes | Default tenant under test |
-| `TEST_EMAIL` | Yes | Login email for test user |
-| `TEST_PASSWORD` | Yes | Login password |
-| `API_AUTH_TOKEN` | Yes | Bearer token for API client |
-| `COMPANY1_TOKEN` | For isolation tests | Auth token for company1 |
-| `COMPANY2_TOKEN` | For isolation tests | Auth token for company2 |
-| `DATAHUB_GMS_URL` | For DataHub integration | DataHub GMS endpoint, e.g. `http://localhost:8080` |
-| `DATAHUB_TOKEN` | For DataHub auth | DataHub personal access token |
-| `BROWSERSTACK_USERNAME` | For BrowserStack | BrowserStack account username |
-| `BROWSERSTACK_ACCESS_KEY` | For BrowserStack | BrowserStack account access key |
-| `HEADLESS` | No | Run headless (default `true`) |
-| `DEFAULT_TIMEOUT` | No | Playwright timeout in ms (default `15000`) |
 
 ## License
 
